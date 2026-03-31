@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EL PICHON</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;600&display=swap" rel="stylesheet">
+
+<style>
+body {
+  margin: 0;
+  font-family: 'Poppins', sans-serif;
+  background: #0f0f0f;
+  color: white;
+}
+
+/* NAV */
+.nav {
+  position: fixed;
+  width: 100%;
+  backdrop-filter: blur(10px);
+  background: rgba(0,0,0,0.5);
+  padding: 15px 30px;
+}
+
+/* HERO */
+.hero {
+  height: 100vh;
+  background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)),
+              url('https://picsum.photos/1600/900?food');
+  background-size: cover;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: 50px;
+}
+
+.hero p {
+  font-size: 20px;
+  opacity: 0.8;
+}
+
+/* BOTÓN */
+.btn {
+  background: linear-gradient(45deg, #ff416c, #ff4b2b);
+  padding: 12px 25px;
+  border-radius: 30px;
+  color: white;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* SECCIONES */
+.section {
+  padding: 80px 20px;
+  text-align: center;
+}
+
+/* MENÚ */
+.menu {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+}
+
+.item {
+  width: 220px;
+  padding: 20px;
+  border-radius: 15px;
+  background: rgba(255,255,255,0.05);
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.item:hover {
+  transform: scale(1.05);
+}
+
+.item.selected {
+  border: 2px solid #ff416c;
+}
+
+/* FORM */
+.form {
+  max-width: 400px;
+  margin: auto;
+  text-align: left;
+}
+
+.total {
+  font-size: 22px;
+  margin: 20px 0;
+  color: #00ff99;
+}
+
+/* WHATSAPP */
+.whatsapp {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #25D366;
+  padding: 15px;
+  border-radius: 50%;
+  color: white;
+}
+</style>
+</head>
+
+<body>
+
+<div class="nav">
+  <h2>🔥 EL PICHON</h2>
+</div>
+
+<section class="hero">
+  <div>
+    <h1>EL PICHON</h1>
+    <p>🔥 Sabor que te hace volver 🔥</p>
+    <a class="btn" href="#menu">Ordenar ahora</a>
+  </div>
+</section>
+
+<section class="section" id="menu">
+  <h2>Menú</h2>
+
+  <div class="menu">
+    <div class="item" onclick="seleccionar(this,'Hamburguesa',120)">Hamburguesa $120</div>
+    <div class="item" onclick="seleccionar(this,'Pizza',150)">Pizza $150</div>
+    <div class="item" onclick="seleccionar(this,'Tacos',80)">Tacos $80</div>
+    <div class="item" onclick="seleccionar(this,'Alitas',140)">Alitas $140</div>
+  </div>
+
+  <div class="form">
+
+    <h3>Cantidad</h3>
+    <input type="number" id="cantidad" value="1" min="1" onchange="calcular()" style="width:100%; padding:10px; border-radius:8px;">
+
+    <div id="extrasContainer">
+      <h3>Extras</h3>
+      <div id="extras"></div>
+    </div>
+
+    <h3>Entrega</h3>
+    <label><input type="radio" name="envio" value="A domicilio" onchange="toggleDireccion()"> A domicilio</label>
+    <label><input type="radio" name="envio" value="Recoger" onchange="toggleDireccion()"> Recoger</label>
+
+    <div id="direccionBox">
+      <input type="text" id="direccion" placeholder="Dirección" style="width:100%; padding:10px; margin-top:10px;">
+    </div>
+
+    <div class="total" id="total">Total: $0</div>
+
+    <a class="btn" onclick="enviarPedido()">Enviar pedido</a>
+
+  </div>
+
+</section>
+
+<a class="whatsapp" href="#">💬</a>
+
+<script>
+let precioBase = 0;
+let producto = "";
+let extrasData = {
+  "Hamburguesa": [
+    {nombre:"Queso extra", precio:20},
+    {nombre:"Bacon", precio:30}
+  ],
+  "Pizza": [
+    {nombre:"Extra queso", precio:25},
+    {nombre:"Pepperoni", precio:35}
+  ],
+  "Tacos": [
+    {nombre:"Queso", precio:15},
+    {nombre:"Guacamole", precio:20}
+  ],
+  "Alitas": [
+    {nombre:"BBQ", precio:15},
+    {nombre:"Extra salsa", precio:10}
+  ]
+};
+
+function seleccionar(el, nombre, precio){
+  document.querySelectorAll('.item').forEach(i => i.classList.remove('selected'));
+  el.classList.add('selected');
+
+  producto = nombre;
+  precioBase = precio;
+
+  mostrarExtras(nombre);
+  calcular();
+}
+
+function mostrarExtras(nombre){
+  let cont = document.getElementById("extras");
+  cont.innerHTML = "";
+
+  extrasData[nombre].forEach(e => {
+    cont.innerHTML += `
+      <label>
+        <input type="checkbox" value="${e.nombre}" data-precio="${e.precio}" onchange="calcular()">
+        ${e.nombre} (+${e.precio})
+      </label>
+    `;
+  });
+}
+
+function calcular(){
+  let cantidad = document.getElementById('cantidad').value;
+  let extras = document.querySelectorAll('#extras input:checked');
+
+  let total = precioBase * cantidad;
+
+  extras.forEach(e => {
+    total += parseInt(e.dataset.precio);
+  });
+
+  document.getElementById('total').innerText = "Total: $" + total;
+}
+
+function toggleDireccion(){
+  let envio = document.querySelector('input[name="envio"]:checked').value;
+  document.getElementById("direccionBox").style.display =
+    envio === "A domicilio" ? "block" : "none";
+}
+
+function enviarPedido(){
+  let envio = document.querySelector('input[name="envio"]:checked');
+  let direccion = document.getElementById('direccion').value;
+  let total = document.getElementById('total').innerText;
+
+  let extras = document.querySelectorAll('#extras input:checked');
+  let listaExtras = "";
+  extras.forEach(e => listaExtras += "- " + e.value + "%0A");
+
+  let mensaje = "🔥 Pedido EL PICHON 🔥%0A";
+  mensaje += producto + "%0A" + total + "%0A";
+  if(listaExtras) mensaje += "Extras:%0A" + listaExtras;
+
+  if(envio){
+    mensaje += "Entrega: " + envio.value + "%0A";
+  }
+
+  if(envio && envio.value === "A domicilio"){
+    mensaje += "Dirección: " + direccion;
+  }
+
+  window.open("https://wa.me/5215512345678?text=" + mensaje);
+}
+</script>
+
+</body>
+</html>
